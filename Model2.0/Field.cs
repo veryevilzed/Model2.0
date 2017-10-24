@@ -1,4 +1,6 @@
-﻿namespace TinyLima.Tools
+﻿using System.Runtime.InteropServices.ComTypes;
+
+namespace TinyLima.Tools
 {
 
     
@@ -18,10 +20,14 @@
         {
             T before = obj;
             obj = item;
-            if (OnChange != null)
-                OnChange(this, obj, before);
+            OnChange?.Invoke(this, obj, before);
         }
 
+        public void Refresh()
+        {
+            OnChange?.Invoke(this, obj, obj);
+        }
+        
         public T Value
         {
             get => Get();
@@ -76,6 +82,7 @@
     {
         object AsObject { get; }
         string Name { get; set; }
+        void Refresh();
         DFieldChange OnChange { get; set; }
     }
 }

@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using System.Runtime.Remoting.Messaging;
 
 namespace TinyLima.Tools
 {
 
     public delegate void DEventMethod<in T>(T a);
+    public delegate void DEventMethod(params object[] array);
     public delegate void DEventMethod<in A,in B>(A a, B b);
     public delegate void DEventMethod<in A,in B, in C>(A a, B b, C c);
     public delegate void DEventMethod<in A,in B, in C, in D>(A a, B b, C c, D d);
@@ -24,6 +27,7 @@ namespace TinyLima.Tools
         {
             public MethodInfo Method { get; set; }
             public object Target { get; set; }
+            public string EventName { get; set; }
             
             public void Invoke(object[] args)
             {
@@ -34,7 +38,12 @@ namespace TinyLima.Tools
                 }
                 catch (Exception e)
                 {
-                    throw new Exception($"Invoke {Method.Name} on {Target.GetType().Name} Exception {e.Message}");
+                    Exception thr = e;
+                    while (thr.InnerException != null)
+                        thr = thr.InnerException;
+                    LogCallback.Error(thr);
+                    throw thr;
+
                 }
             }
             
@@ -89,7 +98,16 @@ namespace TinyLima.Tools
         {
             count = Math.Min(count, AsyncQueue.Count);
             for (var i = 0; i < count; i++)
-                AsyncQueue.Dequeue().Invoke();
+            {
+                try
+                {
+                    AsyncQueue.Dequeue().Invoke();
+                }
+                catch (Exception e)
+                {
+                    LogCallback.Error(e);
+                }
+            }
         }
         
         /// <summary>
@@ -114,16 +132,16 @@ namespace TinyLima.Tools
             }
         }
 
-        private void Add(MethodInfoObject mio)
+        private void Add(MethodInfoObject mio, string newEventName = "")
         {
-            string eventName = mio.Method.Name;
+            string eventName = newEventName != "" ? newEventName : mio.Method.Name;
             if (mio.Method.GetCustomAttributes(typeof(Event), true).Length > 0)
             {
                 foreach (var attr in mio.Method.GetCustomAttributes(typeof(Event), true))
                 {
                     if (attr.GetType() != typeof(Event)) continue;
                     var e = (Event) attr;
-                    eventName = e.EventName ?? mio.Method.Name;
+                    eventName = newEventName != "" ? newEventName : e.EventName ?? mio.Method.Name;
                     if (!_eventListeners.ContainsKey(eventName))
                         _eventListeners.Add(eventName, new List<MethodInfoObject>());
                     if (!_eventListeners[eventName].Contains(mio))
@@ -139,16 +157,16 @@ namespace TinyLima.Tools
             }
         }
 
-        private void Remove(MethodInfoObject mio)
+        private void Remove(MethodInfoObject mio, string newEventName="")
         {
-            string eventName = mio.Method.Name;
+            string eventName = newEventName != "" ? newEventName : mio.Method.Name;
             if (mio.Method.GetCustomAttributes(typeof(Event), true).Length > 0)
             {
                 foreach (var attr in mio.Method.GetCustomAttributes(typeof(Event), true))
                 {
                     if (attr.GetType() != typeof(Event)) continue;
                     var e = (Event) attr;
-                    eventName = e.EventName ?? mio.Method.Name;
+                    eventName = newEventName != "" ? newEventName : e.EventName ?? mio.Method.Name;
                     if (_eventListeners.ContainsKey(eventName))
                         if (_eventListeners[eventName].Remove(mio))
                             if (_eventListeners[eventName].Count == 0)
@@ -174,7 +192,16 @@ namespace TinyLima.Tools
         {
             Add(new MethodInfoObject {Target = method.Target, Method = method.Method});
         }
-
+        
+        /// <summary>
+        /// Добавить кастомный метод
+        /// </summary>
+        /// <param name="method">Слушатель</param>
+        public void AddAction(DEventMethod method)
+        {
+            Add(new MethodInfoObject {Target = method.Target, Method = method.Method});
+        }
+        
         /// <summary>
         /// Добавить кастомный метод
         /// </summary>
@@ -184,6 +211,12 @@ namespace TinyLima.Tools
             Add(new MethodInfoObject {Target = method.Target, Method = method.Method});
         }
 
+        public void AddAction<T>(string eventName, DEventMethod<T> method)
+        {
+            Add(new MethodInfoObject {Target = method.Target, Method = method.Method}, eventName);
+        }
+
+        
         /// <summary>
         /// Добавить кастомный метод
         /// </summary>
@@ -238,10 +271,21 @@ namespace TinyLima.Tools
             Remove(method);
         }
 
+        public void RemoveAction(DEventMethod method)
+        {
+            Remove(new MethodInfoObject {Target = method.Target, Method = method.Method});
+        }
+        
         public void RemoveAction<T>(DEventMethod<T> method)
         {
             Remove(new MethodInfoObject {Target = method.Target, Method = method.Method});
         }
+        
+        public void RemoveAction<T>(DEventMethod<T> method, string eventName)
+        {
+            Remove(new MethodInfoObject {Target = method.Target, Method = method.Method}, eventName);
+        }
+        
         
         public void RemoveAction<A,B>(DEventMethod<A,B> method)
         {
@@ -304,6 +348,15 @@ namespace TinyLima.Tools
                 _eventListeners[eventName].ForEach(e =>
                 {
                     var send = new object[e.Method.GetParameters().Length];
+                    //TODO Params Objects
+                    if (e.Method.GetParameters().Length == 1
+                        && e.Method.GetParameters()[0].GetCustomAttributes(typeof(ParamArrayAttribute), false).Length > 0
+                        && e.Method.GetParameters()[0].ParameterType == typeof(object[]))
+                    {
+                        e.Invoke(new object[] {args});
+                        return;
+                    }
+                    
                     for (var i = 0; i < Math.Min(args.Length, e.Method.GetParameters().Length);i++)
                         if (e.Method.GetParameters()[i].ParameterType == args[i].GetType())
                             send[i] = args[i];

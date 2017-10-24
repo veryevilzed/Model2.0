@@ -40,8 +40,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncEventManager.cs" />
-    <Compile Include="FormatedStringField.cs" />
     <Compile Include="IntegerField.cs" />
+    <Compile Include="LinkedField.cs" />
+    <Compile Include="LogCallback.cs" />
     <Compile Include="LongField.cs" />
     <Compile Include="Model.cs" />
     <Compile Include="Field.cs" />
