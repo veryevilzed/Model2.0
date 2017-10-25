@@ -5,11 +5,11 @@ using System.Linq;
 namespace TinyLima.Tools{
     public abstract class Model : IDisposable
     {
-        private AsyncEventManager EventManager { get; }
+        public AsyncEventManager EventManager { get; }
 
         private void Change(IField field, object value, object before)
         {
-            EventManager.InvokeAsync($"On{field.Name}Changed", value, before, this);
+            EventManager.InvokeAsync($"On{field.Name}Changed", value, before, this, field.Name);
             EventManager.InvokeAsync("ModelChanged", field.Name, value, before, this);
         }
         

@@ -540,8 +540,8 @@ namespace TinyLima.Tools
     /// <summary>
     /// Пометить метод для вызова события
     /// </summary>
-    [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple=true) ]
-    public class Event : System.Attribute
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple=true) ]
+    public class Event : Attribute
     {
         public string EventName { get; }
         
