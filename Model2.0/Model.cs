@@ -34,6 +34,17 @@ namespace TinyLima.Tools{
             }
             EventManager.ClearAll(this);
         }
+
+        public void Refresh()
+        {
+            foreach (var fieldInfo in GetType()
+                .GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+            {
+                if (!fieldInfo.FieldType.GetInterfaces().Contains(typeof(IField))) continue;
+                var changableObject = (IField) fieldInfo.GetValue(this);
+                changableObject.Refresh();
+            }
+        }
         
         protected Model()
         {
@@ -62,13 +73,7 @@ namespace TinyLima.Tools{
             
             EventManager.Add(this);
 
-            foreach (var fieldInfo in GetType()
-                .GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
-            {
-                if (!fieldInfo.FieldType.GetInterfaces().Contains(typeof(IField))) continue;
-                var changableObject = (IField) fieldInfo.GetValue(this);
-                changableObject.Refresh();
-            }
+            Refresh();
 
         }
         

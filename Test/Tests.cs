@@ -16,8 +16,18 @@ namespace Test
 
             
         }
-        
-        
+
+        [Test]
+        public void TestString()
+        {
+            StringField sf = new StringField();
+            sf.Value = "15";
+            Assert.AreEqual(sf.Value, "15");
+            sf.Set("150");
+            Assert.AreEqual(sf.Value, "150");
+            
+        }
+
         [Test]
         public void Test1()
         {

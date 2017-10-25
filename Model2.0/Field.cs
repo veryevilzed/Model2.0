@@ -25,7 +25,13 @@ namespace TinyLima.Tools
 
         public void Refresh()
         {
-            OnChange?.Invoke(this, obj, obj);
+            if (obj != null)
+                OnChange?.Invoke(this, obj, obj);
+        }
+
+        public void SilentSet(T item)
+        {
+            obj = item;
         }
         
         public T Value

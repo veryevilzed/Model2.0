@@ -46,7 +46,12 @@ namespace TinyLima.Tools
 
                 }
             }
-            
+
+            public override string ToString()
+            {
+                return $"{Target.GetType().Name}.{Method.Name}";
+            }
+
             public override bool Equals(object obj)
             {
                 if (obj == null || obj.GetType() != typeof(MethodInfoObject))
@@ -479,10 +484,13 @@ namespace TinyLima.Tools
         public void InvokeAsync(string eventName, params object[] args)
         {
             if (_eventListeners.ContainsKey(eventName))
-                _eventListeners[eventName].ForEach(e => 
+                _eventListeners[eventName].ForEach(e =>
                 {
+                    
+                    
                     var send = new object[e.Method.GetParameters().Length];
-                    for (var i = 0; i < Math.Min(args.Length, e.Method.GetParameters().Length);i++)
+                    for (var i = 0; i < Math.Min(args.Length, e.Method.GetParameters().Length); i++)
+                    {
                         if (e.Method.GetParameters()[i].ParameterType == args[i].GetType())
                             send[i] = args[i];
                         else
@@ -504,7 +512,7 @@ namespace TinyLima.Tools
                                 if (args[i] is double)
                                     try
                                     {
-                                        send[i] = (float)args[i];
+                                        send[i] = (float) args[i];
                                     }
                                     catch (InvalidCastException)
                                     {
@@ -512,6 +520,7 @@ namespace TinyLima.Tools
                             if (e.Method.GetParameters()[i].ParameterType == typeof(string))
                                 send[i] = args[i] == null ? "" : args[i].ToString();
                         }
+                    }
                     AsyncQueue.Enqueue(new MethodInvocationObject {EventObject = e, Send = send});
                 });
         }
@@ -536,6 +545,8 @@ namespace TinyLima.Tools
     {
         public string EventName { get; }
         
+        public string[] Except { get; }
+        
         /// <summary>
         /// Имя события будет имя метода маленькими буквами
         /// </summary>
@@ -545,9 +556,16 @@ namespace TinyLima.Tools
         /// Конструктор
         /// </summary>
         /// <param name="eventName">Имя события</param>
-        public Event(string eventName)
+        public Event(string eventName=null)
         {
             EventName = eventName;
         }
+        
+        public Event(string eventName=null, string[] except = null)
+        {
+            EventName = eventName;
+            Except = except;
+        }
+
     }
 }

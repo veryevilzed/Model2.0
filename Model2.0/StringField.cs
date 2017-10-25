@@ -10,6 +10,7 @@ namespace TinyLima.Tools
         public int Count => Value.Length;
         public void Trim() => Value.Trim();
         public StringField(string value) : base(value) {}
+        public StringField() : base() {}
         
     }
 }
