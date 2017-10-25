@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Linq;
 
 namespace TinyLima.Tools{
-    public abstract class Model
+    public abstract class Model : IDisposable
     {
         private AsyncEventManager EventManager { get; }
 
@@ -18,8 +18,20 @@ namespace TinyLima.Tools{
             EventManager.ExecuteAsync(count);
         }
 
-        ~Model()
+        public void Dispose()
         {
+            foreach (var fieldInfo in GetType()
+                .GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+            {
+                if (!fieldInfo.FieldType.GetInterfaces().Contains(typeof(IField))) continue;
+                
+                var changableObject = (IField) fieldInfo.GetValue(this);
+                if (fieldInfo.FieldType.GetInterfaces().Contains(typeof(ILinkedField)))
+                {
+                    var linkedObject = (ILinkedField)changableObject;
+                    linkedObject.UnLink(EventManager);
+                }
+            }
             EventManager.ClearAll(this);
         }
         
@@ -49,7 +61,6 @@ namespace TinyLima.Tools{
             
             
             EventManager.Add(this);
-
 
             foreach (var fieldInfo in GetType()
                 .GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))

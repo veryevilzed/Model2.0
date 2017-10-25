@@ -18,7 +18,7 @@ namespace TinyLima.Tools
     /// <summary>
     /// Событийный менеджер для Модели данных
     /// </summary>
-    public class AsyncEventManager
+    public class AsyncEventManager : IDisposable
     {
         /// <summary>
         /// Класс хранения объекта и метода
@@ -71,6 +71,12 @@ namespace TinyLima.Tools
         public interface IMethodInvocationObject
         {
             void Invoke();
+        }
+
+        public void Dispose()
+        {
+            _eventListeners.Clear();
+            
         }
         
         /// <summary>
@@ -193,6 +199,11 @@ namespace TinyLima.Tools
             Add(new MethodInfoObject {Target = method.Target, Method = method.Method});
         }
         
+        public void AddAction(string eventName ,Action method)
+        {
+            Add(new MethodInfoObject {Target = method.Target, Method = method.Method}, eventName);
+        }
+        
         /// <summary>
         /// Добавить кастомный метод
         /// </summary>
@@ -201,6 +212,12 @@ namespace TinyLima.Tools
         {
             Add(new MethodInfoObject {Target = method.Target, Method = method.Method});
         }
+
+        public void AddAction(string eventName, DEventMethod method)
+        {
+            Add(new MethodInfoObject {Target = method.Target, Method = method.Method}, eventName);
+        }
+
         
         /// <summary>
         /// Добавить кастомный метод
@@ -226,6 +243,11 @@ namespace TinyLima.Tools
             Add(new MethodInfoObject {Target = method.Target, Method = method.Method});
         }
         
+        public void AddAction<A,B>(string eventName, DEventMethod<A,B> method)
+        {
+            Add(new MethodInfoObject {Target = method.Target, Method = method.Method}, eventName);
+        }
+        
         /// <summary>
         /// Добавить кастомный метод
         /// </summary>
@@ -233,6 +255,11 @@ namespace TinyLima.Tools
         public void AddAction<A,B,C>(DEventMethod<A,B,C> method)
         {
             Add(new MethodInfoObject {Target = method.Target, Method = method.Method});
+        }
+        
+        public void AddAction<A,B,C>(string eventName, DEventMethod<A,B,C> method)
+        {
+            Add(new MethodInfoObject {Target = method.Target, Method = method.Method}, eventName);
         }
 
         /// <summary>
@@ -242,6 +269,11 @@ namespace TinyLima.Tools
         public void AddAction<A,B,C,D>(DEventMethod<A,B,C,D> method)
         {
             Add(new MethodInfoObject {Target = method.Target, Method = method.Method});
+        }
+
+        public void AddAction<A,B,C,D>(string eventName, DEventMethod<A,B,C,D> method)
+        {
+            Add(new MethodInfoObject {Target = method.Target, Method = method.Method}, eventName);
         }
 
 
@@ -254,6 +286,12 @@ namespace TinyLima.Tools
             Add(new MethodInfoObject {Target = method.Target, Method = method.Method});
         }
         
+        public void AddAction<A,B,C,D,E>(string eventName, DEventMethod<A,B,C,D,E> method)
+        {
+            Add(new MethodInfoObject {Target = method.Target, Method = method.Method}, eventName);
+        }
+
+        
         /// <summary>
         /// Добавить кастомный метод
         /// </summary>
@@ -262,13 +300,25 @@ namespace TinyLima.Tools
         {
             Add(new MethodInfoObject {Target = method.Target, Method = method.Method});
         }
+        
+        
+        public void AddAction<A,B,C,D,E,F>(string eventName, DEventMethod<A,B,C,D,E,F> method)
+        {
+            Add(new MethodInfoObject {Target = method.Target, Method = method.Method}, eventName);
+        }
+        
         #endregion
         
         #region RemoveAction
         
         public void RemoveAction(Action method)
         {
-            Remove(method);
+            Remove(new MethodInfoObject {Target = method.Target, Method = method.Method});
+        }
+        
+        public void RemoveAction(string eventName, Action method)
+        {
+            Remove(new MethodInfoObject {Target = method.Target, Method = method.Method}, eventName);
         }
 
         public void RemoveAction(DEventMethod method)
@@ -276,12 +326,17 @@ namespace TinyLima.Tools
             Remove(new MethodInfoObject {Target = method.Target, Method = method.Method});
         }
         
+        public void RemoveAction(string eventName, DEventMethod method)
+        {
+            Remove(new MethodInfoObject {Target = method.Target, Method = method.Method}, eventName);
+        }
+        
         public void RemoveAction<T>(DEventMethod<T> method)
         {
             Remove(new MethodInfoObject {Target = method.Target, Method = method.Method});
         }
         
-        public void RemoveAction<T>(DEventMethod<T> method, string eventName)
+        public void RemoveAction<T>(string eventName, DEventMethod<T> method)
         {
             Remove(new MethodInfoObject {Target = method.Target, Method = method.Method}, eventName);
         }
@@ -292,9 +347,20 @@ namespace TinyLima.Tools
             Remove(new MethodInfoObject {Target = method.Target, Method = method.Method});
         }
 
+        
+        public void RemoveAction<A,B>(string eventName, DEventMethod<A,B> method)
+        {
+            Remove(new MethodInfoObject {Target = method.Target, Method = method.Method}, eventName);
+        }
+        
         public void RemoveAction<A,B,C>(DEventMethod<A,B,C> method)
         {
             Remove(new MethodInfoObject {Target = method.Target, Method = method.Method});
+        }
+        
+        public void RemoveAction<A,B,C>(string eventName, DEventMethod<A,B,C> method)
+        {
+            Remove(new MethodInfoObject {Target = method.Target, Method = method.Method}, eventName);
         }
 
         public void RemoveAction<A,B,C,D>(DEventMethod<A,B,C,D> method)
@@ -302,14 +368,30 @@ namespace TinyLima.Tools
             Remove(new MethodInfoObject {Target = method.Target, Method = method.Method});
         }
 
+        public void RemoveAction<A,B,C,D>(string eventName, DEventMethod<A,B,C,D> method)
+        {
+            Remove(new MethodInfoObject {Target = method.Target, Method = method.Method}, eventName);
+        }
+
+        
         public void RemoveAction<A,B,C,D,E>(DEventMethod<A,B,C,D,E> method)
         {
             Remove(new MethodInfoObject {Target = method.Target, Method = method.Method});
         }
         
+        public void RemoveAction<A,B,C,D,E>(string eventName, DEventMethod<A,B,C,D,E> method)
+        {
+            Remove(new MethodInfoObject {Target = method.Target, Method = method.Method}, eventName);
+        }
+        
         public void RemoveAction<A,B,C,D,E,F>(DEventMethod<A,B,C,D,E,F> method)
         {
             Remove(new MethodInfoObject {Target = method.Target, Method = method.Method});
+        }
+        
+        public void RemoveAction<A,B,C,D,E,F>(string eventName, DEventMethod<A,B,C,D,E,F> method)
+        {
+            Remove(new MethodInfoObject {Target = method.Target, Method = method.Method}, eventName);
         }
         
         #endregion
