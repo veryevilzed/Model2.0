@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="AsyncEventManagerTest.cs" />
     <Compile Include="TestConvertation.cs" />
+    <Compile Include="TestDynamicModel.cs" />
     <Compile Include="TestFSM.cs" />
     <Compile Include="TestModel.cs" />
     <Compile Include="Tests.cs" />

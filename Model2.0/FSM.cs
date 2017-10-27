@@ -8,6 +8,9 @@ namespace TinyLima.Tools
     /// </summary>
     public class FSM : IDisposable
     {
+        public static bool ShowFsmEnterState { get; set; }
+        public static bool ShowFsmExitState { get; set; }
+        
         private readonly Dictionary<string, IState> _states = new Dictionary<string, IState>();
 
         private IState currentState;
@@ -29,7 +32,7 @@ namespace TinyLima.Tools
                     found = true;
                 }
                 if (!found)
-                    LogCallback.Error("FSMState {0} doesn't have attribute State", state.GetType().Name);
+                    Log.Error("FSMState {0} doesn't have attribute State", state.GetType().Name);
             }
         }
         
@@ -48,7 +51,7 @@ namespace TinyLima.Tools
                     found = true;
                 }
                 if (!found)
-                    LogCallback.Error("FSMState {0} doesn't have attribute State", state.GetType().Name);
+                    Log.Error("FSMState {0} doesn't have attribute State", state.GetType().Name);
             }
         }
 
@@ -61,7 +64,7 @@ namespace TinyLima.Tools
         {
             if (_states.ContainsKey(stateName))
             {
-                LogCallback.Warn("Dublicate state with name {0}. Use method Replace", stateName);
+                Log.Warn("Dublicate state with name {0}. Use method Replace", stateName);
                 _states.Remove(stateName);
             }
             state.Parent = this;
@@ -94,12 +97,14 @@ namespace TinyLima.Tools
         /// <param name="name"></param>
         public void Change(string name)
         {
-            Console.WriteLine("GO:{0}", name);
+            if (ShowFsmExitState) Log.Debug("--- EXIT {0} ---", CurrentStateName);
             currentState?.__ExitState();
+            if (!_states.ContainsKey(name))
+                throw new Exception("Key "+name+" not found!");
             currentState = _states[name];
             CurrentStateName = name;
-            currentState.__EnterState();
-            Console.WriteLine("DN:{0}",name);
+            if (ShowFsmEnterState) Log.Debug("--- ENTER {0} ---", CurrentStateName);
+            currentState.__EnterState(); 
         }
 
         /// <summary>

@@ -18,7 +18,7 @@ namespace TinyLima.Tools
 
         public DFormating<T, TS> Formating { get; }
         
-        protected void OnChange(TS value)
+        protected new void OnChange(TS value)
         {
             try
             {
@@ -27,7 +27,7 @@ namespace TinyLima.Tools
             }
             catch (Exception e)
             {
-                LogCallback.Error(e);
+                Log.Error(e);
             }
         }
 
@@ -55,7 +55,7 @@ namespace TinyLima.Tools
 
         public DFormating<T, TSA, TSB> Formating { get; }
         
-        protected void OnChange(TSA valueA, TSB valueB)
+        protected new void OnChange(TSA valueA, TSB valueB)
         {
             try
             {
@@ -64,7 +64,7 @@ namespace TinyLima.Tools
             }
             catch (Exception e)
             {
-                LogCallback.Error(e);
+                Log.Error(e);
             }
         }
 

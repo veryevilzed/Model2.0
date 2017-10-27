@@ -34,7 +34,7 @@ namespace TinyLima.Tools
                     Exception thr = e;
                     while (thr.InnerException != null)
                         thr = thr.InnerException;
-                    LogCallback.Error(thr);
+                    Log.Error(thr);
                     throw thr;
                 }
             }
@@ -96,13 +96,20 @@ namespace TinyLima.Tools
                         case Exit exit:
                             exits.Add(new MethodInfoObject {Method = methodInfo, Target = this, Priority = exit.Priority});
                             break;
-                        case Update update:
-                            updates.Add(new MethodInfoObject {Method = methodInfo, Target = this, Priority = update.Priority});
-                            break;
                         case Loop loop:
-                            timersDictionary.Add(loop.Name ?? methodInfo.Name, loop);
-                            loop.Method = methodInfo;
-                            loop.Target = this;
+                            if (loop.Time == 0)
+                                updates.Add(new MethodInfoObject
+                                {
+                                    Method = methodInfo,
+                                    Target = this,
+                                    Priority = loop.Priority
+                                });
+                            else
+                            {
+                                loop.Method = methodInfo;
+                                loop.Target = this;
+                                timersDictionary.Add(loop.Name ?? methodInfo.Name, loop);
+                            }
                             break;
                         case One one:
                             timersDictionary.Add(one.Name ?? methodInfo.Name, one);
@@ -147,7 +154,6 @@ namespace TinyLima.Tools
         {
             foreach (var m in updates)
                 m.Invoke(deltaTime);
-            Console.WriteLine("Update timers:{0}", timers.Count);
             foreach (var t in timers)
                 t.Update(deltaTime);
         }
@@ -192,19 +198,6 @@ namespace TinyLima.Tools
         }
     }
     
-    [AttributeUsage(AttributeTargets.Method) ]
-    public class Update : Attribute
-    {
-        public int Priority { get; }
-        
-        public Update(){}
-
-        public Update(int priority)
-        {
-            Priority = priority;
-        }
-    }
-
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class One : Timing
     {
@@ -242,6 +235,9 @@ namespace TinyLima.Tools
     {
         private float _currentTime = 0.0f;
         private float _resetTime = 0.0f;
+        
+        public float Time => _resetTime;
+
         public bool Loop { get; }
         public bool Enable { get; protected set; }
         public object Target { get; set; }
@@ -254,7 +250,6 @@ namespace TinyLima.Tools
         {
             _currentTime = _resetTime;
             Enable = true;
-            Console.WriteLine("Timer reset!");
         }
 
         public void Stop()
@@ -272,7 +267,6 @@ namespace TinyLima.Tools
             
             try
             {
-                Console.WriteLine("M:{0} T:{1}", Method == null, Target == null);
                 Method.Invoke(Target, Args);
             }
             catch (TargetInvocationException e)
@@ -280,7 +274,7 @@ namespace TinyLima.Tools
                 Exception thr = e;
                 while (thr.InnerException != null)
                     thr = thr.InnerException;
-                LogCallback.Error(thr);
+                Log.Error(thr);
             }
 
             if (Loop)
@@ -289,10 +283,10 @@ namespace TinyLima.Tools
                 Enable = false;
         }
 
-        public Timing(float currentTime, float resetTime, bool loop)
+        public Timing(float resetTime, float currentTime, bool loop)
         {
-            _currentTime = currentTime;
             _resetTime = resetTime;
+            _currentTime = currentTime;
             Loop = loop;
         }
         

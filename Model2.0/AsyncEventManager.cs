@@ -41,7 +41,7 @@ namespace TinyLima.Tools
                     Exception thr = e;
                     while (thr.InnerException != null)
                         thr = thr.InnerException;
-                    LogCallback.Error(thr);
+                    Log.Error(thr);
                     throw thr;
 
                 }
@@ -116,7 +116,7 @@ namespace TinyLima.Tools
                 }
                 catch (Exception e)
                 {
-                    LogCallback.Error(e);
+                    Log.Error(e);
                 }
             }
         }
@@ -540,7 +540,7 @@ namespace TinyLima.Tools
     /// <summary>
     /// Пометить метод для вызова события
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple=true) ]
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple=true, Inherited = true)]
     public class Event : Attribute
     {
         public string EventName { get; }

@@ -33,22 +33,29 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="SmartFormat, Version=2.1.0.2, Culture=neutral, PublicKeyToken=568866805651201f">
+      <HintPath>..\..\..\src\cs\SmartFormat.NET\src\SmartFormat\bin\Debug\net40\SmartFormat.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\..\cs\UnityEngine.Log\UnityEngine.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncEventManager.cs" />
     <Compile Include="FSM.cs" />
     <Compile Include="IntegerField.cs" />
     <Compile Include="LinkedField.cs" />
-    <Compile Include="LogCallback.cs" />
+    <Compile Include="Log.cs" />
     <Compile Include="LongField.cs" />
     <Compile Include="Model.cs" />
     <Compile Include="Field.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="FSMState.cs" />
+    <Compile Include="DynamicModel.cs" />
     <Compile Include="StringField.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
