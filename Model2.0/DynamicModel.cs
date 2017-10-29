@@ -100,6 +100,17 @@ namespace TinyLima.Tools
             }
         }
 
+        public void SetString(string fieldName, string format, params object[] args)
+        {
+            Set(fieldName, Smart.Format(format, args));
+        }
+
+        public void SetStringAsync(string fieldName, string format, params object[] args)
+        {
+            SetAsync(fieldName, Smart.Format(format, args));
+        }
+
+        
         public int GetInt(string name, int def = default(int))
         {
             if (!dataObject.ContainsKey(name) || dataObject[name] == null)

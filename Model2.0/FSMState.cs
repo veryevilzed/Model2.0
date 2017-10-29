@@ -221,7 +221,7 @@ namespace TinyLima.Tools
         
         public Loop(float time, float startTime, string name) : this(time, startTime, name, 0){}
         
-        public Loop(float time, float startTime, string name, int priority) : base(time, startTime, false){ 
+        public Loop(float time, float startTime, string name, int priority) : base(time, startTime, true){ 
             Name = name;
             Priority = priority;
         }
@@ -276,7 +276,7 @@ namespace TinyLima.Tools
                     thr = thr.InnerException;
                 Log.Error(thr);
             }
-
+            
             if (Loop)
                 _currentTime += _resetTime;
             else
