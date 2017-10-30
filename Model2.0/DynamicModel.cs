@@ -61,9 +61,10 @@ namespace TinyLima.Tools
             aem.InvokeAsync("ModelChanged", name, this);
         }
         
+        [Event("OnModelFieldDelaySet")]
         public void Set(string name, object obj)
         {
-            
+            Console.WriteLine("Set:{0} = {1}", name, obj);
             if (dataObject.ContainsKey(name))
             {
                 if (dataObject[name] != obj)
@@ -98,6 +99,11 @@ namespace TinyLima.Tools
                 dataObject.Add(name, obj);
                 SendEventsAsync(name, obj, null);
             }
+        }
+
+        public void SetDelay(float delay, string fiendName, object value)
+        {
+            aem.InvokeDelayAsync(delay, "OnModelFieldDelaySet", fiendName, value);
         }
 
         public void SetString(string fieldName, string format, params object[] args)
@@ -213,5 +219,11 @@ namespace TinyLima.Tools
 
         public int Count => dataObject.Count;
         public bool IsReadOnly => false;
+
+        public void Update(float deltaTime)
+        {
+            aem.Update(deltaTime);
+        }
+        
     }
 }

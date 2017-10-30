@@ -47,6 +47,22 @@ namespace Test
 
 
         }
+
+        [Test]
+        public void TestAsyncEvents()
+        {
+            MyModel model = new MyModel();
+            model.Set("Item1", 100);
+            Assert.AreEqual(model.GetInt("Item1"), 100);
+            model.SetDelay(2.0f, "Item1", 200);
+            Assert.AreEqual(model.GetInt("Item1"), 100);
+            model.Update(1.0f);
+            Assert.AreEqual(model.GetInt("Item1"), 100);
+            model.Update(1.1f);
+            Assert.AreEqual(model.GetInt("Item1"), 200);
+            
+        }
+        
         
     }
     

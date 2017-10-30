@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Remoting.Messaging;
@@ -43,13 +44,12 @@ namespace TinyLima.Tools
                         thr = thr.InnerException;
                     Log.Error(thr);
                     throw thr;
-
                 }
             }
 
             public override string ToString()
             {
-                return $"{Target.GetType().Name}.{Method.Name}";
+                return $"{Target.GetType().Name}.{Method.Name} for {EventName}";
             }
 
             public override bool Equals(object obj)
@@ -73,9 +73,14 @@ namespace TinyLima.Tools
             }
         }
 
+        
+        
+        
+        
         public interface IMethodInvocationObject
         {
             void Invoke();
+            float Delay { get; set; }
         }
 
         public void Dispose()
@@ -91,6 +96,7 @@ namespace TinyLima.Tools
         {
             public MethodInfoObject EventObject { get; set; }
             public object[] Send { get; set; }
+            public float Delay { get; set; }
             public void Invoke()
             {
                 EventObject.Invoke(Send);
@@ -99,20 +105,33 @@ namespace TinyLima.Tools
 
         public Queue<IMethodInvocationObject> AsyncQueue { get; } = new Queue<IMethodInvocationObject>();
         readonly Dictionary<string, List<MethodInfoObject>> _eventListeners = new Dictionary<string, List<MethodInfoObject>>();
-
+        
 
         /// <summary>
         /// Выполнить набор заданий из очереди
         /// </summary>
         /// <param name="count">Количество</param>
-        public void ExecuteAsync(int count = int.MaxValue)
+        /// <param name="deltaTime">Время между обновлениями для отложенных Task</param>
+        public void ExecuteAsync(int count = int.MaxValue, float deltaTime = 1f)
         {
             count = Math.Min(count, AsyncQueue.Count);
             for (var i = 0; i < count; i++)
             {
                 try
                 {
-                    AsyncQueue.Dequeue().Invoke();
+                    
+                    IMethodInvocationObject invokationObject = AsyncQueue.Dequeue();
+                    if (invokationObject.Delay <= 0)
+                        invokationObject.Invoke();
+                    else
+                    {
+                        invokationObject.Delay -= deltaTime;
+                        if (invokationObject.Delay <= 0)
+                            invokationObject.Invoke();
+                        else
+                            AsyncQueue.Enqueue(invokationObject);
+                    }
+
                 }
                 catch (Exception e)
                 {
@@ -476,6 +495,47 @@ namespace TinyLima.Tools
                 });
         }
 
+
+        private object[] ProcessSend(MethodInfoObject e, object[] args)
+        {
+            var send = new object[e.Method.GetParameters().Length];
+            for (var i = 0; i < Math.Min(args.Length, e.Method.GetParameters().Length); i++)
+            {
+                if (e.Method.GetParameters()[i].ParameterType == args[i].GetType())
+                    send[i] = args[i];
+                else
+                {
+                    //конвертируемые типы
+                    if (e.Method.GetParameters()[i].ParameterType == typeof(object))
+                        send[i] = args[i];
+                    if (e.Method.GetParameters()[i].ParameterType == typeof(int))
+                        if (args[i] is byte || args[i] is long || args[i] is double)
+                            send[i] = Convert.ToInt32(args[i]);
+                    if (e.Method.GetParameters()[i].ParameterType == typeof(long))
+                        if (args[i] is byte || args[i] is int || args[i] is double)
+                            send[i] = Convert.ToInt64(args[i]);
+                    if (e.Method.GetParameters()[i].ParameterType == typeof(byte))
+                        if (args[i] is int || args[i] is long || args[i] is double)
+                            send[i] = Convert.ToByte(args[i]);
+                    if (e.Method.GetParameters()[i].ParameterType == typeof(double))
+                        if (args[i] is byte || args[i] is long || args[i] is int || args[i] is float)
+                            send[i] = Convert.ToDouble(args[i]);
+                    if (e.Method.GetParameters()[i].ParameterType == typeof(float))
+                        if (args[i] is double)
+                            try
+                            {
+                                send[i] = (float) args[i];
+                            }
+                            catch (InvalidCastException)
+                            {
+                            }
+                    if (e.Method.GetParameters()[i].ParameterType == typeof(string))
+                        send[i] = args[i] == null ? "" : args[i].ToString();
+                }
+            }
+            return send;
+        }
+        
         /// <summary>
         /// Положить вызовы в коллекцию для последующего вызова
         /// </summary>
@@ -483,46 +543,27 @@ namespace TinyLima.Tools
         /// <param name="args">Аргументы</param>
         public void InvokeAsync(string eventName, params object[] args)
         {
+            InvokeDelayAsync(0f, eventName, args);
+        }
+
+
+        /// <summary>
+        /// Вызвать событие с задержкой
+        /// </summary>
+        /// <param name="delay">Задержка</param>
+        /// <param name="eventName">Событие</param>
+        /// <param name="args">Аргументы</param>
+        public void InvokeDelayAsync(float delay, string eventName, params object[] args)
+        {
+            
             if (_eventListeners.ContainsKey(eventName))
                 _eventListeners[eventName].ForEach(e =>
-                {
-                    
-                    
-                    var send = new object[e.Method.GetParameters().Length];
-                    for (var i = 0; i < Math.Min(args.Length, e.Method.GetParameters().Length); i++)
-                    {
-                        if (e.Method.GetParameters()[i].ParameterType == args[i].GetType())
-                            send[i] = args[i];
-                        else
-                        {
-                            //конвертируемые типы
-                            if (e.Method.GetParameters()[i].ParameterType == typeof(int))
-                                if (args[i] is byte || args[i] is long || args[i] is double)
-                                    send[i] = Convert.ToInt32(args[i]);
-                            if (e.Method.GetParameters()[i].ParameterType == typeof(long))
-                                if (args[i] is byte || args[i] is int || args[i] is double)
-                                    send[i] = Convert.ToInt64(args[i]);
-                            if (e.Method.GetParameters()[i].ParameterType == typeof(byte))
-                                if (args[i] is int || args[i] is long || args[i] is double)
-                                    send[i] = Convert.ToByte(args[i]);
-                            if (e.Method.GetParameters()[i].ParameterType == typeof(double))
-                                if (args[i] is byte || args[i] is long || args[i] is int || args[i] is float)
-                                    send[i] = Convert.ToDouble(args[i]);
-                            if (e.Method.GetParameters()[i].ParameterType == typeof(float))
-                                if (args[i] is double)
-                                    try
-                                    {
-                                        send[i] = (float) args[i];
-                                    }
-                                    catch (InvalidCastException)
-                                    {
-                                    }
-                            if (e.Method.GetParameters()[i].ParameterType == typeof(string))
-                                send[i] = args[i] == null ? "" : args[i].ToString();
-                        }
-                    }
-                    AsyncQueue.Enqueue(new MethodInvocationObject {EventObject = e, Send = send});
-                });
+                    AsyncQueue.Enqueue(new MethodInvocationObject{
+                            EventObject = e,
+                            Send = ProcessSend(e, args),
+                            Delay = delay
+                    })
+                );
         }
         
         /// <summary>
@@ -533,6 +574,16 @@ namespace TinyLima.Tools
         {
             _eventListeners.Clear();
             AsyncQueue.Clear();
+        }
+
+
+        /// <summary>
+        /// Обновить таймер для отложенных задач
+        /// </summary>
+        /// <param name="timeDeltaTime"></param>
+        public void Update(float timeDeltaTime)
+        {
+            ExecuteAsync(deltaTime: timeDeltaTime);
         }
     }
     
