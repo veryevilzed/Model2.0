@@ -29,6 +29,18 @@ namespace Test
             outsideModelChangedCall++;
         }
         
+        [Test]
+        public void TestSetString()
+        {
+            MyModel model = new MyModel();
+            model.EventManager.Add(this);
+            String title = "MyNewTitle";
+            model.SetString("Title", "title");
+            Assert.AreEqual(model.GetString("Title"), "title");
+            model.SetString("Title", title);
+            Assert.AreEqual(model.GetString("Title"), "MyNewTitle");
+        }
+        
         
         [Test]
         public void TestItemsEvents()

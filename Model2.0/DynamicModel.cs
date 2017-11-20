@@ -16,6 +16,21 @@ namespace TinyLima.Tools
 
         public AsyncEventManager EventManager => aem;
 
+        
+        public void Refresh(string key)
+        {
+            if (!ContainsKey(key))
+                return;
+            SendEvents(key, this[key], this[key]);
+        }
+
+        public void RefreshAll()
+        {
+            foreach (KeyValuePair<string, object> kv in this)
+                SendEvents(kv.Key, kv.Value, kv.Value);
+        }
+
+
         public void Dispose()
         {
             aem.Dispose();
@@ -55,10 +70,28 @@ namespace TinyLima.Tools
             aem.Invoke("ModelChanged", name, this);
         }
         
+        
+        
         protected virtual void SendEventsAsync(string name, object value, object before)
         {
             aem.InvokeAsync(Smart.Format("On{0}Changed", name), value, before, this);
             aem.InvokeAsync("ModelChanged", name, this);
+        }
+
+        public void SilentSet(string name, object obj)
+        {
+            if (dataObject.ContainsKey(name))
+            {
+                if (dataObject[name] != obj)
+                {
+                    var before = dataObject[name]; 
+                    dataObject[name] = obj;
+                }
+            }
+            else
+            {
+                dataObject.Add(name, obj);
+            }
         }
         
         [Event("OnModelFieldDelaySet")]
