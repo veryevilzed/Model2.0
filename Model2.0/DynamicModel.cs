@@ -25,11 +25,9 @@ namespace TinyLima.Tools
         }
 
         public void RefreshAll()
-        {
-            foreach (KeyValuePair<string, object> kv in this)
-                SendEvents(kv.Key, kv.Value, kv.Value);
+        {   
+            dataObject.ToList().ForEach(kv => SendEvents(kv.Key, kv.Value, kv.Value));
         }
-
 
         public void Dispose()
         {

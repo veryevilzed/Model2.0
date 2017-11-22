@@ -136,7 +136,7 @@ namespace TinyLima.Tools
             exits.Clear();
             updates.Clear();
         }
-        
+
         public void __EnterState()
         {
             timers.ForEach(t => t.Reset());
@@ -183,7 +183,6 @@ namespace TinyLima.Tools
             Priority = priority;
         }
     }
-    
     
     [AttributeUsage(AttributeTargets.Method) ]
     public class Exit : Attribute

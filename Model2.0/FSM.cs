@@ -16,6 +16,16 @@ namespace TinyLima.Tools
         private IState currentState;
         
         public string CurrentStateName { get; protected set; }
+
+        /// <summary>
+        /// Содержит состояние
+        /// </summary>
+        /// <param name="stateName"></param>
+        /// <returns></returns>
+        public bool ContainsState(string stateName)
+        {
+            return _states.ContainsKey(stateName);
+        }
         
         /// <summary>
         /// Добавить новые состояния
