@@ -80,6 +80,7 @@ namespace TinyLima.Tools
             state.Parent = this;
             _states.Add(stateName, state);
         }
+        
 
         /// <summary>
         /// Заменить состояние на новое

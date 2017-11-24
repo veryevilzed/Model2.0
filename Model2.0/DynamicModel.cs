@@ -34,6 +34,30 @@ namespace TinyLima.Tools
             aem.Dispose();
             dataObject.Clear();
         }
+
+        public string Toggle(string key, params string[] objects)
+        {
+            if (objects.Length == 0)
+                return null;
+
+            string o = Get<string>(key);
+            if (String.IsNullOrEmpty(o))
+            {
+                Set(key, objects[0]);
+                return objects[0];
+            }
+            
+            List<string> l = new List<string>(objects);
+            int index = l.IndexOf(o);
+            if (index == -1)
+            {
+                Set(key, objects[0]);
+                return objects[0];
+            }
+            index++;
+            Set(key, objects[index % objects.Length]);
+            return objects[index % objects.Length];
+        }
         
         public void Add(string key, object value) => Set(key, value);
 
