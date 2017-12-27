@@ -8,9 +8,20 @@ namespace TinyLima.Tools
     public class Field<T> : IField
     {
         private T obj;
-        public T Get() => obj;
-        public T Get(T def) => obj == null ? def : obj;        
-        public object AsObject => Get();
+        public T Get()
+        {
+            return obj;
+        }
+
+        public T Get(T def)
+        {
+            return obj == null ? def : obj;
+        }
+
+        public object AsObject
+        {
+            get { return Get(); }
+        }
 
         public string Name { get; set; }
         
@@ -20,13 +31,13 @@ namespace TinyLima.Tools
         {
             T before = obj;
             obj = item;
-            OnChange?.Invoke(this, obj, before);
+            if (OnChange != null) OnChange.Invoke(this, obj, before);
         }
 
         public void Refresh()
         {
             if (obj != null)
-                OnChange?.Invoke(this, obj, obj);
+                if (OnChange != null) OnChange.Invoke(this, obj, obj);
         }
 
         public void SilentSet(T item)
@@ -36,8 +47,8 @@ namespace TinyLima.Tools
         
         public T Value
         {
-            get => Get();
-            set => Set(value);
+            get { return Get(); }
+            set { Set(value); }
         }
 
         public static bool operator ==(Field<T> a, Field<T> b)
@@ -47,13 +58,21 @@ namespace TinyLima.Tools
             return a.Equals(b);
         }
 
-        public static bool operator !=(Field<T> a, Field<T> b) => !(a == b);
-        
-            
-        
-        
-        public Field(T value) => obj = value;
-        public Field() => obj = default(T);
+        public static bool operator !=(Field<T> a, Field<T> b)
+        {
+            return !(a == b);
+        }
+
+
+        public Field(T value)
+        {
+            obj = value;
+        }
+
+        public Field()
+        {
+            obj = default(T);
+        }
 
         public override bool Equals(object obj)
         {
@@ -81,7 +100,10 @@ namespace TinyLima.Tools
             return obj.GetHashCode();
         }
         
-        public string Format(string message) => string.Format(message, Get());
+        public string Format(string message)
+        {
+            return string.Format(message, Get());
+        }
     }
 
     public interface IField

@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
-using System.Runtime.Remoting.Messaging;
+using SmartFormat;
 
 namespace TinyLima.Tools
 {
@@ -21,6 +19,9 @@ namespace TinyLima.Tools
     /// </summary>
     public class AsyncEventManager : IDisposable
     {
+        
+        private static readonly ILog Log = new ILog();// LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        
         /// <summary>
         /// Класс хранения объекта и метода
         /// </summary>
@@ -49,7 +50,7 @@ namespace TinyLima.Tools
 
             public override string ToString()
             {
-                return $"{Target.GetType().Name}.{Method.Name} for {EventName}";
+                return Smart.Format("{Target.GetType().Name}.{Method.Name} for {EventName}", this);
             }
 
             public override bool Equals(object obj)
@@ -103,7 +104,8 @@ namespace TinyLima.Tools
             }
         }
 
-        public Queue<IMethodInvocationObject> AsyncQueue { get; } = new Queue<IMethodInvocationObject>();
+        Queue<IMethodInvocationObject> _asyncQueue = new Queue<IMethodInvocationObject>();
+        public Queue<IMethodInvocationObject> AsyncQueue { get { return _asyncQueue;  } }
         readonly Dictionary<string, List<MethodInfoObject>> _eventListeners = new Dictionary<string, List<MethodInfoObject>>();
         
 
@@ -153,6 +155,11 @@ namespace TinyLima.Tools
                     if (attr.GetType() != typeof(Event)) continue;
                     var e = (Event) attr;
                     var eventName = e.EventName ?? methodInfo.Name;
+                    Console.WriteLine("EventName:{0}", eventName);
+                    if (eventName.Contains("{"))
+                        eventName = Smart.Format(eventName, obj);
+                    Console.WriteLine("EventName:{0}", eventName);
+                    
                     if (!_eventListeners.ContainsKey(eventName))
                         _eventListeners.Add(eventName, new List<MethodInfoObject>());
                     var mio = new MethodInfoObject {Target = obj, Method = methodInfo };
@@ -165,6 +172,7 @@ namespace TinyLima.Tools
         private void Add(MethodInfoObject mio, string newEventName = "")
         {
             string eventName = newEventName != "" ? newEventName : mio.Method.Name;
+            
             if (mio.Method.GetCustomAttributes(typeof(Event), true).Length > 0)
             {
                 foreach (var attr in mio.Method.GetCustomAttributes(typeof(Event), true))
@@ -594,14 +602,14 @@ namespace TinyLima.Tools
     [AttributeUsage(AttributeTargets.Method, AllowMultiple=true, Inherited = true)]
     public class Event : Attribute
     {
-        public string EventName { get; }
+        public string EventName { get; protected set; }
         
-        public string[] Except { get; }
+        public string[] Except { get; protected set; }
         
         /// <summary>
         /// Имя события будет имя метода маленькими буквами
         /// </summary>
-        public Event(){}
+        public Event() {}
 
         /// <summary>
         /// Конструктор

@@ -42,12 +42,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsyncEventManagerTest.cs" />
-    <Compile Include="TestConvertation.cs" />
     <Compile Include="TestDynamicModel.cs" />
+    <Compile Include="TestEventManager.cs" />
     <Compile Include="TestFSM.cs" />
-    <Compile Include="TestModel.cs" />
-    <Compile Include="Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using SmartFormat;
 
 namespace TinyLima.Tools
 {
@@ -16,7 +17,8 @@ namespace TinyLima.Tools
         private IState currentState;
         
         public string CurrentStateName { get; protected set; }
-
+        private static readonly ILog Log = new ILog();// LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        
         /// <summary>
         /// Содержит состояние
         /// </summary>
@@ -42,7 +44,7 @@ namespace TinyLima.Tools
                     found = true;
                 }
                 if (!found)
-                    Log.Error("FSMState {0} doesn't have attribute State", state.GetType().Name);
+                    Log.Error(Smart.Format("FSMState {0} doesn't have attribute State", state.GetType().Name));
             }
         }
         
@@ -61,7 +63,7 @@ namespace TinyLima.Tools
                     found = true;
                 }
                 if (!found)
-                    Log.Error("FSMState {0} doesn't have attribute State", state.GetType().Name);
+                    Log.Error(Smart.Format("FSMState {0} doesn't have attribute State", state.GetType().Name));
             }
         }
 
@@ -74,7 +76,7 @@ namespace TinyLima.Tools
         {
             if (_states.ContainsKey(stateName))
             {
-                Log.Warn("Dublicate state with name {0}. Use method Replace", stateName);
+                Log.Warn(Smart.Format("Dublicate state with name {0}. Use method Replace", stateName));
                 _states.Remove(stateName);
             }
             state.Parent = this;
@@ -108,13 +110,16 @@ namespace TinyLima.Tools
         /// <param name="name"></param>
         public void Change(string name)
         {
-            if (ShowFsmExitState) Log.Debug("--- EXIT {0} ---", CurrentStateName);
-            currentState?.__ExitState();
+            if (ShowFsmExitState) Log.Debug(Smart.Format("--- EXIT {0} ---", CurrentStateName));
+            if (currentState != null)
+                currentState.__ExitState();
+            
             if (!_states.ContainsKey(name))
-                throw new Exception("Key "+name+" not found!");
+                throw new Exception("Key " + name + " not found!");
+            
             currentState = _states[name];
             CurrentStateName = name;
-            if (ShowFsmEnterState) Log.Debug("--- ENTER {0} ---", CurrentStateName);
+            if (ShowFsmEnterState) Log.Debug(Smart.Format("--- ENTER {0} ---", CurrentStateName));
             currentState.__EnterState(); 
         }
 
@@ -122,15 +127,21 @@ namespace TinyLima.Tools
         /// Update loop
         /// </summary>
         /// <param name="deltaTime"></param>
-        public void Update(float deltaTime) => currentState?.__UpdateState(deltaTime);
-        
+        public void Update(float deltaTime)
+        {
+            if (currentState != null) currentState.__UpdateState(deltaTime);
+        }
+
         /// <summary>
         /// События
         /// </summary>
         /// <param name="eventName"></param>
         /// <param name="args"></param>
-        public void Invoke(string eventName, params object[] args) => currentState?.__Invoke(eventName, args);
-        
+        public void Invoke(string eventName, params object[] args)
+        {
+            if (currentState != null) currentState.__Invoke(eventName, args);
+        }
+
         public void Dispose()
         {
             foreach (var kv in _states)

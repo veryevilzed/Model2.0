@@ -14,9 +14,17 @@ namespace TinyLima.Tools
         private readonly Dictionary<string, object> dataObject;
         private readonly AsyncEventManager aem;
 
-        public AsyncEventManager EventManager => aem;
+        public AsyncEventManager EventManager { get { return aem;  }}
 
         
+        private MLog _log;
+
+        protected MLog Log
+        {
+            get { return _log ?? (_log = new MLog(GetType())); }
+        }
+
+
         public void Refresh(string key)
         {
             if (!ContainsKey(key))
@@ -59,9 +67,15 @@ namespace TinyLima.Tools
             return objects[index % objects.Length];
         }
         
-        public void Add(string key, object value) => Set(key, value);
+        public void Add(string key, object value)
+        {
+            Set(key, value);
+        }
 
-        public bool ContainsKey(string key) => dataObject.ContainsKey(key);
+        public bool ContainsKey(string key)
+        {
+            return dataObject.ContainsKey(key);
+        }
 
         public bool Remove(string key)
         {
@@ -75,16 +89,26 @@ namespace TinyLima.Tools
             return false;
         }
 
-        public bool TryGetValue(string key, out object value) => dataObject.TryGetValue(key, out value);
+        public bool TryGetValue(string key, out object value)
+        {
+            return dataObject.TryGetValue(key, out value);
+        }
 
         public object this[string name]
         {
-            get => dataObject[name];
-            set => Set(name, value);
+            get { return dataObject[name]; }
+            set { Set(name, value); }
         }
 
-        public ICollection<string> Keys => dataObject.Keys;
-        public ICollection<object> Values => dataObject.Values;
+        public ICollection<string> Keys
+        {
+            get { return dataObject.Keys; }
+        }
+
+        public ICollection<object> Values
+        {
+            get { return dataObject.Values; }
+        }
 
         protected virtual void SendEvents(string name, object value, object before)
         {
@@ -246,8 +270,11 @@ namespace TinyLima.Tools
             }
         }
 
-        public void Dec(string name, int value = 1) => Inc(name, -value);
-        
+        public void Dec(string name, int value = 1)
+        {
+            Inc(name, -value);
+        }
+
         public DynamicModel(): this( new Dictionary<string, object>()) {}
         public DynamicModel(Dictionary<string, object> construct)
         {
@@ -256,24 +283,49 @@ namespace TinyLima.Tools
             aem.Add(this);
         }
 
-        public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => dataObject.GetEnumerator();
+        public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
+        {
+            return dataObject.GetEnumerator();
+        }
 
-        IEnumerator IEnumerable.GetEnumerator() => dataObject.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return dataObject.GetEnumerator();
+        }
 
-        public void Add(KeyValuePair<string, object> item) => Set(item.Key, item.Value);
+        public void Add(KeyValuePair<string, object> item)
+        {
+            Set(item.Key, item.Value);
+        }
 
-        public void Clear() => dataObject.Clear();
+        public void Clear()
+        {
+            dataObject.Clear();
+        }
 
-        public bool Contains(KeyValuePair<string, object> item) => dataObject.Contains(item);
+        public bool Contains(KeyValuePair<string, object> item)
+        {
+            return dataObject.Contains(item);
+        }
 
         public void CopyTo(KeyValuePair<string, object>[] array, int arrayIndex)
         {
         }
 
-        public bool Remove(KeyValuePair<string, object> item) => Remove(item.Key);
+        public bool Remove(KeyValuePair<string, object> item)
+        {
+            return Remove(item.Key);
+        }
 
-        public int Count => dataObject.Count;
-        public bool IsReadOnly => false;
+        public int Count
+        {
+            get { return dataObject.Count; }
+        }
+
+        public bool IsReadOnly
+        {
+            get { return false; }
+        }
 
         public void Update(float deltaTime)
         {

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using SmartFormat;
+
 
 namespace TinyLima.Tools
 {
@@ -13,15 +15,29 @@ namespace TinyLima.Tools
 
 
         private AsyncEventManager asm;
-        
+
+        private MLog _log;        
+        protected MLog Log
+        {
+            get { return _log ?? (_log = new MLog(GetType())); }
+        }
+
         /// <summary>
-        /// МетодШивокер
+        /// Методинвокер
         /// </summary>
         private class MethodInfoObject
         {
             public MethodInfo Method { get; set; }
             public object Target { get; set; }
             public int Priority { get; set; }
+            
+            protected MLog _log;        
+            private MLog Log
+            {
+                get { return _log ?? (_log = new MLog(GetType())); }
+            }
+
+
             public void Invoke(params object[] args)
             {
                 if (Target == null) return;
@@ -41,7 +57,7 @@ namespace TinyLima.Tools
 
             public override string ToString()
             {
-                return $"{Target.GetType().Name}.{Method.Name}";
+                return Smart.Format("{Target.GetType().Name}.{Method.Name}", this);
             }
 
             public override bool Equals(object obj)
@@ -88,34 +104,37 @@ namespace TinyLima.Tools
             {
                 foreach (var o in methodInfo.GetCustomAttributes(false))
                 {
-                    switch (o)
+                    if (o.GetType() == typeof(Enter))
                     {
-                        case Enter enter:
-                            enters.Add(new MethodInfoObject {Method = methodInfo, Target = this, Priority = enter.Priority});
-                            break;
-                        case Exit exit:
-                            exits.Add(new MethodInfoObject {Method = methodInfo, Target = this, Priority = exit.Priority});
-                            break;
-                        case Loop loop:
-                            if (loop.Time == 0)
-                                updates.Add(new MethodInfoObject
-                                {
-                                    Method = methodInfo,
-                                    Target = this,
-                                    Priority = loop.Priority
-                                });
-                            else
+                        var enter = (Enter) o;
+                        enters.Add(new MethodInfoObject {Method = methodInfo, Target = this, Priority = enter.Priority});
+                    }else if (o.GetType() == typeof(Exit))
+                    {
+                        var exit = (Exit) o;
+                        exits.Add(new MethodInfoObject {Method = methodInfo, Target = this, Priority = exit.Priority});
+                    }else if (o.GetType() == typeof(Loop))
+                    {
+                        var loop = (Loop) o;
+                        if (loop.Time == 0)
+                            updates.Add(new MethodInfoObject
                             {
-                                loop.Method = methodInfo;
-                                loop.Target = this;
-                                timersDictionary.Add(loop.Name ?? methodInfo.Name, loop);
-                            }
-                            break;
-                        case One one:
-                            timersDictionary.Add(one.Name ?? methodInfo.Name, one);
-                            one.Method = methodInfo;
-                            one.Target = this;
-                            break;           
+                                Method = methodInfo,
+                                Target = this,
+                                Priority = loop.Priority
+                            });
+                        else
+                        {
+                            loop.Method = methodInfo;
+                            loop.Target = this;
+                            timersDictionary.Add(loop.Name ?? methodInfo.Name, loop);
+                        }
+                        break;
+                    }else if (o.GetType() == typeof(One))
+                    {
+                        var one = (One) o;
+                        timersDictionary.Add(one.Name ?? methodInfo.Name, one);
+                        one.Method = methodInfo;
+                        one.Target = this;
                     }
                 }
             }
@@ -127,8 +146,11 @@ namespace TinyLima.Tools
             asm.Add(this);
         }
 
-        public void __Invoke(string eventName, object[] args) => asm.Invoke(eventName, args); 
-        
+        public void __Invoke(string eventName, object[] args)
+        {
+            asm.Invoke(eventName, args);
+        }
+
         public void Dispose()
         {
             asm.Dispose();
@@ -163,7 +185,7 @@ namespace TinyLima.Tools
     [AttributeUsage(AttributeTargets.Class) ]
     public class State : Attribute
     {
-        public string Name { get; }
+        public string Name { get; protected set; }
         
         public State(string name)
         {
@@ -174,7 +196,7 @@ namespace TinyLima.Tools
     [AttributeUsage(AttributeTargets.Method) ]
     public class Enter : Attribute
     {
-        public int Priority { get; }
+        public int Priority { get; protected set;  }
         
         public Enter(){}
 
@@ -187,7 +209,7 @@ namespace TinyLima.Tools
     [AttributeUsage(AttributeTargets.Method) ]
     public class Exit : Attribute
     {
-        public int Priority { get; }
+        public int Priority { get; protected set; }
         
         public Exit(){}
 
@@ -234,10 +256,13 @@ namespace TinyLima.Tools
     {
         private float _currentTime = 0.0f;
         private float _resetTime = 0.0f;
-        
-        public float Time => _resetTime;
+        private static readonly ILog Log = new ILog();// LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        public float Time
+        {
+            get { return _resetTime; }
+        }
 
-        public bool Loop { get; }
+        public bool Loop { get; protected set; }
         public bool Enable { get; protected set; }
         public object Target { get; set; }
         public MethodInfo Method { get; set; }
