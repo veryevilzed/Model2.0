@@ -112,7 +112,7 @@ namespace TinyLima.Tools
 
         protected virtual void SendEvents(string name, object value, object before)
         {
-            aem.Invoke(Smart.Format("On{0}Changed", name), value, before, this);
+            aem.Invoke("On"+name+"Changed", value, before, this);
             aem.Invoke("ModelChanged", name, this);
         }
         
@@ -120,7 +120,7 @@ namespace TinyLima.Tools
         
         protected virtual void SendEventsAsync(string name, object value, object before)
         {
-            aem.InvokeAsync(Smart.Format("On{0}Changed", name), value, before, this);
+            aem.InvokeAsync("On"+name+"Changed", value, before, this);
             aem.InvokeAsync("ModelChanged", name, this);
         }
 
@@ -143,7 +143,7 @@ namespace TinyLima.Tools
         [Event("OnModelFieldDelaySet")]
         public void Set(string name, object obj)
         {
-            Console.WriteLine("Set:{0} = {1}", name, obj);
+            
             if (dataObject.ContainsKey(name))
             {
                 if (dataObject[name] != obj)

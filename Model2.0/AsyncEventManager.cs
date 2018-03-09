@@ -155,10 +155,8 @@ namespace TinyLima.Tools
                     if (attr.GetType() != typeof(Event)) continue;
                     var e = (Event) attr;
                     var eventName = e.EventName ?? methodInfo.Name;
-                    Console.WriteLine("EventName:{0}", eventName);
                     if (eventName.Contains("{"))
                         eventName = Smart.Format(eventName, obj);
-                    Console.WriteLine("EventName:{0}", eventName);
                     
                     if (!_eventListeners.ContainsKey(eventName))
                         _eventListeners.Add(eventName, new List<MethodInfoObject>());

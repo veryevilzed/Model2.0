@@ -44,12 +44,12 @@ namespace TinyLima.Tools
 
         public void Error(Exception e, string message, params object[] args)
         {
-            log.Error(Smart.Format(message,args) +"\n"+Smart.Format("{0}\n{1}",e.Message, e.StackTrace) );
+            log.Error(Smart.Format(message,args) +"\n"+string.Format("{0}\n{1}",e.Message, e.StackTrace) );
         }
 
         public void Error(Exception e)
         {
-            log.Error(Smart.Format("{0}\n{1}",e.Message, e.StackTrace));
+            log.Error(string.Format("{0}\n{1}",e.Message, e.StackTrace));
         }
 
         public MLog(Type type)
