@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using SmartFormat;
 
-namespace TinyLima.Tools
+namespace Novolot.Tools
 {
 
     public delegate void DEventMethod<in T>(T a);
@@ -20,7 +20,7 @@ namespace TinyLima.Tools
     public class AsyncEventManager : IDisposable
     {
         
-        private static readonly ILog Log = new ILog();// LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log = new ILog();
         
         /// <summary>
         /// Класс хранения объекта и метода
@@ -50,7 +50,7 @@ namespace TinyLima.Tools
 
             public override string ToString()
             {
-                return Smart.Format("{Target.GetType().Name}.{Method.Name} for {EventName}", this);
+                return $"{Target.GetType().Name}.{Method.Name} for {EventName}";
             }
 
             public override bool Equals(object obj)
@@ -439,8 +439,9 @@ namespace TinyLima.Tools
                 {
                     if (attr.GetType() != typeof(Event)) continue;
                     var e = (Event) attr;
-                    var eventName = e.EventName ?? methodInfo.Name;
+                    var eventName = e.EventName ?? methodInfo.Name ;
                     var mio = new MethodInfoObject {Target = obj, Method = methodInfo };
+                    
                     if (_eventListeners.ContainsKey(eventName))
                         if (_eventListeners[eventName].Remove(mio))
                             if (_eventListeners[eventName].Count == 0)
@@ -617,6 +618,7 @@ namespace TinyLima.Tools
         {
             EventName = eventName;
         }
+        
         
         public Event(string eventName=null, string[] except = null)
         {

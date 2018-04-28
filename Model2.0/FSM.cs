@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using SmartFormat;
 
-namespace TinyLima.Tools
+namespace Novolot.Tools
 {
     /// <summary>
     /// Машина состояний

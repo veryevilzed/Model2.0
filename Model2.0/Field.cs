@@ -1,6 +1,5 @@
-﻿using System.Runtime.InteropServices.ComTypes;
-
-namespace TinyLima.Tools
+﻿
+namespace Novolot.Tools
 {
 
     

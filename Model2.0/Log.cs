@@ -1,8 +1,7 @@
 ﻿using System;
 using SmartFormat;
-using UnityEngine;
 
-namespace TinyLima.Tools
+namespace Novolot.Tools
 {
 
     public class ILog
@@ -54,12 +53,12 @@ namespace TinyLima.Tools
 
         public MLog(Type type)
         {
-            log = new ILog(); //LogManager.GetLogger(type);
+            log = new ILog();
         }
 
         public MLog(string name)
         {
-            log = new ILog();//LogManager.GetLogger(name);
+            log = new ILog();
         }
     }
     

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using SmartFormat;
 using System.Linq;
 
-namespace TinyLima.Tools
+namespace Novolot.Tools
 {
     /// <summary>
     /// Модель основанная на дикте с динамичискими полями

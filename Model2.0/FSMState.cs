@@ -5,7 +5,7 @@ using System.Reflection;
 using SmartFormat;
 
 
-namespace TinyLima.Tools
+namespace Novolot.Tools
 {
     /// <summary>
     /// Состояние

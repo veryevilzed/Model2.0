@@ -1,5 +1,5 @@
 ﻿using NUnit.Framework;
-using TinyLima.Tools;
+using Novolot.Tools;
 
 namespace Test
 {
