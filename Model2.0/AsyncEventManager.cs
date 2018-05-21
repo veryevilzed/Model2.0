@@ -625,6 +625,5 @@ namespace Novolot.Tools
             EventName = eventName;
             Except = except;
         }
-
     }
 }

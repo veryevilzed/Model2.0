@@ -14,9 +14,9 @@ namespace Novolot.Tools
         private readonly Dictionary<string, object> dataObject;
         private readonly AsyncEventManager aem;
 
-        public AsyncEventManager EventManager { get { return aem;  }}
+        public AsyncEventManager EventManager => aem;
 
-        
+
         private MLog _log;
 
         protected MLog Log
@@ -42,7 +42,7 @@ namespace Novolot.Tools
             aem.Dispose();
             dataObject.Clear();
         }
-
+ 
         public string Toggle(string key, params string[] objects)
         {
             if (objects.Length == 0)
