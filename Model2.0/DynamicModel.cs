@@ -79,14 +79,11 @@ namespace Novolot.Tools
 
         public bool Remove(string key)
         {
-            if (dataObject.ContainsKey(key))
-            {
-                var before = dataObject[key];
-                dataObject.Remove(key);
-                SendEvents(key, null, before);
-                return true;
-            } 
-            return false;
+            if (!dataObject.ContainsKey(key)) return false;
+            var before = dataObject[key];
+            dataObject.Remove(key);
+            SendEvents(key, null, before);
+            return true;
         }
 
         public bool TryGetValue(string key, out object value)
